@@ -1,4 +1,4 @@
-# Deep-learning-based Projected Gradient Descent for Image Reconstruction 
+# Deep-learning-based Projected Gradient Descent for Image Reconstruction
 
 This project includes a framework to:
 
