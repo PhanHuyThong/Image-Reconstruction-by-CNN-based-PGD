@@ -1,0 +1,133 @@
+classdef System
+    
+% general class containing all the main methods 
+    properties
+        args
+        net
+        t
+        x0
+    end
+    
+    methods
+        function obj = System(cfg)
+            
+            %initialize CNN, parameters, and data
+            
+            obj.args = cfg;
+            obj.net = importONNXNetwork(cfg.net_load_path,'OutputLayerType', 'regression');            
+            
+            clean_path = strcat(cfg.test_target_path, cfg.test_sample_id, '.mat');
+            input_path = strcat(cfg.test_input_path, cfg.test_sample_id, '.mat');
+            obj.t = load(clean_path);
+            obj.t = cell2mat(struct2cell(obj.t));
+            obj.t = permute(obj.t, [2,3,1]);
+
+            obj.x0 = load(input_path);
+            obj.x0 = cell2mat(struct2cell(obj.x0));
+            obj.x0 = permute(obj.x0, [2,3,1]);
+
+            if cfg.preview_data
+                figure_maker({obj.x0, obj.t}, {'noisy', 'clean'}); 
+            end                
+        end
+
+        function [best_snr, rec] = test(obj, x0, t, gamma, H, Ht)
+%         Function test: perform RPGD
+%         Input:
+%             x0    : Matlab real matrix, size [h,w,c],
+%                     the noisy image to be reconstructed, 
+%                     normally obtained from HT(measurement)
+
+%             t     : Matlab real matrix, size [h,w,c], 
+%                     the target, to calculate RSNR
+
+%             gamma : initial learning rate of RPGD
+%             H     : type function, the H operator defined in main.m
+%             Ht    : type function, the HT operator defined in main.m
+%             
+%         Output:
+%             best_snr : type Float, RSNR of the best reconstruction 
+%             rec : type torch.tensor, the best reconstruction
+%             
+            fprintf('reconstruct at initial gamma = %f \n', gamma);
+            y = H(x0);
+            x = x0;
+            best_snr = 0;
+            
+            c = obj.args.c;
+            alpha = obj.args.alpha;
+            
+            for k = 1:obj.args.n_test_iter
+                z = predict(obj.net, x);
+                %choose alpha
+                if k>1
+                    if sum((z-x).^2)>c*sum((z_prev-x_prev).^2)
+                        alpha = c * sum((z_prev-x_prev).^2) / sum((z-x).^2) * alpha;
+                    end
+                end
+                %gradient descent step and calculate loss
+                x = alpha*z + (1-alpha)*x;
+                x = x - gamma* Ht(H(x)-y);
+                loss = sum((abs((H(x)-y)).^2), 'all');
+                [snr, x_tmp, ~] = RSNR(x, t);
+                if snr>best_snr
+                    best_snr = snr;
+                    rec = x_tmp;
+                end
+                if obj.args.test_loss
+                    if mod(k, obj.args.log_step) == 0
+                        fprintf('iteration %d \n', k);
+                        fprintf('loss = %f \n', loss);
+                        
+                    end
+                end
+                
+                z_prev = z;
+                x_prev = x;
+                if mod(k, obj.args.dk)==0
+                    gamma = gamma/obj.args.dgamma;
+                end
+            end
+        end
+        
+        function [best_snr, best_rec] = reconstruct(obj, x0, t, gamma0, H, Ht)
+            
+            
+            l = gamma0(1);
+            r = gamma0(end);
+            snr_plot = [];
+            gamma = [];
+            gamma_tmp = gamma0;
+            while abs(r-l)>obj.args.tol
+                best_snr = 0;
+                gamma = [gamma, gamma_tmp];
+                for i =1:length(gamma_tmp)
+                    [snr, rec] = obj.test(x0, t, gamma_tmp(i), H, Ht);
+                    if snr>best_snr
+                        best_snr = snr;
+                        best_rec = rec;
+                        best_gamma = gamma_tmp(i);
+                    end
+                    snr_plot = [snr_plot, snr];
+                end
+                d = abs(r-l)/5;
+                l = best_gamma - d;
+                r = best_gamma + d;
+                gamma_tmp = linspace(l,r,4);
+            end
+            
+            if obj.args.plot_gamma_snr
+                global fn;
+                figure(fn);
+                fn = fn+1;
+                scatter(gamma, snr_plot);
+                xlabel('gamma');
+                ylabel('snr')
+                savefig([obj.args.fig_save_path, 'snr_vs_gamma.fig']); 
+            end
+        end
+       
+    end
+end
+
+        
