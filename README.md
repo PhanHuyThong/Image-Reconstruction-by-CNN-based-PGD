@@ -3,9 +3,7 @@
 This project includes a framework to:
 
 1) Train a neural network (a Unet) as an image-to-image projector in Pytorch, export it in .pth and .onnx format
-2) Apply the Relaxed Projected Gradient Descent (RPGD) in [1] for image reconstruction. For this part, the code is provided in both Python and Matlab. In Matlab, the measurement operator maybe more readily available thanks to many libraries.
-
-
+2) Apply the Relaxed Projected Gradient Descent (RPGD) in [1] for image reconstruction. For this part, the code is provided in both Python and Matlab. In Matlab, the measurement operator may be more readily available thanks to many libraries.
 ![](example_reconstruction.png) %%% 
 
 ## Getting Started
@@ -28,11 +26,11 @@ Download the folders code and data
 
 ## Running the tests
 
-The clean data provided here (in train_target, test_target folders) consists of 200 training images, 20 testing images, each has 1 channel, 320x320 grayscale pixels. Each image was generated from Matlab phantom function with the parameter E obtained from the Modified Shepp-Logan Head Phantom Image, then add some variations by letting E = E + 0.01*randn(10,6). The measurement operator H is 5x5 convolution with uniform weight = 1/25. The noisy/blurred input to be reconstructed is obtained from HT(H(.))
+The clean data provided here (in *train_target*, *test_target* folders) consists of 200 training images, 20 testing images, each has 1 channel, 320x320 grayscale pixels. Each image was generated from Matlab phantom function with the parameter E obtained from the Modified Shepp-Logan Head Phantom Image, then add some variations by letting E = E + 0.01 * randn(10,6). The measurement operator H is 5x5 convolution with uniform weight = 1/25. The noisy/blurred input to be reconstructed is obtained from HT(H(.))
 
 
 
-In Linux command lines or Windows Shell, go inside the folder code, then type:
+In Linux command lines or Windows Shell, go inside the folder *code*, then type:
 
 ```
 python main.py ../data/reconstruct.cfg
@@ -40,7 +38,7 @@ python main.py ../data/reconstruct.cfg
 
 to run a test reconstruction in Python.
 
-To do the same thing in Matlab, go into the folder Matlab, then type:
+To do the same thing in Matlab, open command lines in the folder *Matlab*, then type:
 
 ```
 matlab -nosplash -nodesktop -r "main('../../data/config/matlab/reconstruct.cfg')"
@@ -66,14 +64,14 @@ help System.reconstruct
 
 #### Data
 
-A customized class named *mydataset* is provided in utils.py to specifically read .mat data. For more info on the class, please type in Python console:
+A customized class named **mydataset** is provided in utils.py to specifically read .mat data. For more info on the class, please type in Python console:
 
 ```
 import utils
 help(utils.mydataset)
 ```
 
-*Note: The Python code only works with data in *mydataset* class. 
+*Note: It is recommended to use this **mydataset** class. Otherwise, please make sure your data size is compatible with the code.
 
 
 
@@ -85,7 +83,7 @@ It should be noted that if the Matlab code is to be used, one should ensure that
 
 #### Training options
 
-There are 4 options provided, corresponding to 3 config files provided as template:
+There are 3 options provided, corresponding to 3 config files provided as template:
 
     train1.cfg          : train the CNN with loss = criterion(output1, target)
     train2.cfg          : train the CNN with loss = (criterion(output1, target) + criterion(output2, target))/2
@@ -100,7 +98,7 @@ There are 4 options provided, corresponding to 3 config files provided as templa
                                             
     train_projector.cfg : train a projector by going through all 3 options above sequentially.
     
-*Note: train1, train2, train3 are normally used to continue the training from a saved CNN; train_projector is like a "convenient package" combining them 
+*Note: train1, train2, train3 are normally used to continue the training from a saved CNN; train_projector is like a "convenient package" combining them sequentially.
 
 ### Image reconstruction
 
