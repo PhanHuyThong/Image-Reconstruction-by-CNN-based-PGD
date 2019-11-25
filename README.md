@@ -98,7 +98,7 @@ There are 3 options provided, corresponding to 3 config files provided as templa
                                             
     train_projector.cfg : train a projector by going through all 3 options above sequentially.
     
-*Note: train1, train2, train3 are normally used to continue the training from a saved CNN; train_projector is like a "convenient package" combining them sequentially.
+* Note: train1, train2, train3 are normally used to continue the training from a saved CNN; train_projector is like a "convenient package" combining them sequentially.
 
 ### Image reconstruction
 
@@ -110,7 +110,7 @@ There are 3 options provided, corresponding to 3 config files provided as templa
     reconstruct.cfg : RPGD for 1 sample with a sweep over initial learning rate = gamma0 , type list
     overall_snr_increase.cfg : go through all the test samples and reconstruct them similar to reconstruct.cfg, print out their average RSNR increase 
     
-*Note: the RPGD algorithm requires an operator H representing the measurement process, from which one can obtain HT (H transpose). The code provided H_MRI(x) = mask*fft(x) and HT_MRI(y) = ifft(mask*y); H_conv(x) = torch.nn.functional.conv2d(x, weight) and HT_conv = torch.nn.functional.conv_transpose2d(x, weight). To add another operator, make changes in line 38 main.py and the config file correspondingly.
+* Note: the RPGD algorithm requires an operator H representing the measurement process, from which one can obtain HT (H transpose). The code provided H_MRI(x) = mask* fft(x) and HT_MRI(y) = ifft(mask* y); H_conv(x) = torch.nn.functional.conv2d(x, weight) and HT_conv = torch.nn.functional.conv_transpose2d(x, weight). To add another operator, make changes in line 38 main.py and the config file correspondingly.
 
 
 #### In Matlab
@@ -120,7 +120,7 @@ There are 2 options provided, corresponding to 2 config files provided as templa
     test.cfg        : RPGD for 1 sample at initial learning rate = gamma
     reconstruct.cfg : RPGD for 1 sample with a sweep over initial learning rate = gamma0
 
-*Note: To add new imaging operators H, HT, simply include them as functions in the same folder as main.m, then adjust line 29 and (maybe) line 21 of main.m, finally don't forget to make changes in the corresponding config file.
+* Note: To add new imaging operators H, HT, simply include them as functions in the same folder as main.m, then adjust line 29 and (maybe) line 21 of main.m, finally don't forget to make changes in the corresponding config file.
 
 ## Contributing
 
